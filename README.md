@@ -59,9 +59,11 @@ Somnia Shannon testnet, chain id 50312. `@somnia-chain/markets-sdk` (pinned to `
 
 ## Status
 
-Live and proven on Shannon testnet, each backed by a real transaction history: the deployed `AutoRedeemHandler` and its reactive subscription; `ec-pricing`'s model and its wiring to live inputs; the maker, run in both dry-run and live-order modes; `lucid-core`, with a headless verification script that exercises every module against live testnet and prints real transaction hashes, including both signing paths (local key and external wallet).
+Live and proven on Shannon testnet, each backed by a real transaction history: the deployed `AutoRedeemHandler` and its reactive subscription; `ec-pricing`'s model and its wiring to live inputs; `lucid-core`, with a headless verification script that exercises every module against live testnet and prints real transaction hashes, including both signing paths (local key and external wallet); the single-capital maker, run in both dry-run and live-order modes; and a multi-market maker (`lucid-maker-v2`) that quotes several markets at once, shares notional capacity across whatever is currently quoted rather than splitting it statically, and widens or pauses a side under a measured trend guard when the underlying is moving fast.
 
-Not yet built: a user-facing app. Everything above is a library, a bot, and a settlement contract; there is no frontend or hosted service yet. The maker also currently trades a single market at a time from its own capital, with no operator-delegated or multi-market operation.
+An on-chain reactive execution layer now exists alongside the off-chain makers: a deployed contract that rests both sides of a quote and cancels the other side itself the instant one fills, no relayer, no polling, and no off-chain process in that loop at all, driven directly by Somnia's reactivity precompile. This was proven live, same block, for a single market, together with a continuous agent loop on top of it that recomputes fair value every cycle and requotes whichever side has drifted or gone quiet after a reactive cancel.
+
+Not yet built: a user-facing app, and multi-market operation for the reactive execution layer, which still runs one market at a time. Everything above is a set of libraries, bots, and contracts; there is no frontend or hosted service yet.
 
 ## Running the key pieces
 
