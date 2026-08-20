@@ -11,8 +11,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@dreamdex-bot-kit/core": "*",
     "@dreamdex-bot-kit/ec-core": "*",
     "@dreamdex-bot-kit/ec-pricing": "*",
+    "@dreamdex-bot-kit/lucid-core": "*",
     "@somnia-chain/reactivity": "0.2.1",
     "@somnia-chain/reactivity-contracts": "0.2.1",
     "dotenv": "^16.4.5",
