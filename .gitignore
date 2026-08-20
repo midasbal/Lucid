@@ -1,0 +1,47 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+build/
+coverage/
+.next/
+out/
+*.tsbuildinfo
+.cache/
+
+# secrets, never commit
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+keystore.json
+mnemonic.txt
+.state/
+
+# logs and local artifacts
+logs/
+artifacts/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# editor cruft
+.vscode/
+.idea/
+*.swp
+.cursor/
+
+# project rule: ignore all Markdown except the root README
+*.md
+!/README.md

@@ -1,0 +1,69 @@
+# dreamDEX
+
+## DEX Docs
+
+- [Introduction](https://docs.dreamdex.io/welcome/readme.md)
+- [Why dreamDEX?](https://docs.dreamdex.io/welcome/why-dreamdex.md)
+- [Making Your First Deposit](https://docs.dreamdex.io/welcome/making-your-first-deposit.md)
+- [Roadmap](https://docs.dreamdex.io/welcome/roadmap.md)
+- [Overview](https://docs.dreamdex.io/trading/trading.md)
+- [Common](https://docs.dreamdex.io/trading/common.md)
+- [Fees](https://docs.dreamdex.io/trading/common/fees.md)
+- [Collateral Yield Algorithm](https://docs.dreamdex.io/trading/common/yield-algorithm.md)
+- [Order Types](https://docs.dreamdex.io/trading/common/order-types.md)
+- [Spot](https://docs.dreamdex.io/trading/readme-1.md)
+- [Overview](https://docs.dreamdex.io/trading/readme-1/spot.md)
+- [Simple Swap](https://docs.dreamdex.io/trading/readme-1/simple-swap.md)
+- [Operators & Session Keys](https://docs.dreamdex.io/trading/readme-1/operators.md)
+- [Stop Orders](https://docs.dreamdex.io/trading/readme-1/stop-orders.md)
+- [Event Contracts](https://docs.dreamdex.io/trading/event-contracts.md)
+- [Settlement & Voids](https://docs.dreamdex.io/trading/event-contracts/settlement-and-voids.md)
+- [FAQ](https://docs.dreamdex.io/trading/event-contracts/faq.md)
+- [Earn](https://docs.dreamdex.io/trading/earn.md)
+- [Overview](https://docs.dreamdex.io/developers/developers.md)
+- [Quick Start](https://docs.dreamdex.io/developers/quick-start.md)
+- [Contracts](https://docs.dreamdex.io/developers/contracts.md): Smart contract API reference for the Somnia DEX order book.
+- [Contract Specifications](https://docs.dreamdex.io/developers/contracts/contract-specifications.md)
+- [Functions](https://docs.dreamdex.io/developers/contracts/functions.md)
+- [Events](https://docs.dreamdex.io/developers/contracts/events.md)
+- [Types](https://docs.dreamdex.io/developers/contracts/types.md)
+- [Errors](https://docs.dreamdex.io/developers/contracts/errors.md): Custom error selectors for the SpotPool and SpotStopOrderRegistry contracts, and how to decode preflight reverts.
+- [SpotRouter](https://docs.dreamdex.io/developers/contracts/spot-router.md)
+- [HTTP API](https://docs.dreamdex.io/developers/http-api.md): The HTTP API for Somnia DEX.
+- [Error Handling](https://docs.dreamdex.io/developers/http-api/error-handling.md)
+- [Authentication](https://docs.dreamdex.io/developers/http-api/authentication.md)
+- [Market Data](https://docs.dreamdex.io/developers/http-api/market-data.md)
+- [Trading](https://docs.dreamdex.io/developers/http-api/trading.md)
+- [Builder Fees](https://docs.dreamdex.io/developers/http-api/builder-fees.md)
+- [Vault](https://docs.dreamdex.io/developers/http-api/vault.md)
+- [Wallets](https://docs.dreamdex.io/developers/http-api/wallets.md)
+- [Portfolio](https://docs.dreamdex.io/developers/http-api/portfolio.md)
+- [Libraries](https://docs.dreamdex.io/developers/libraries.md)
+- [CCXT](https://docs.dreamdex.io/developers/libraries/ccxt.md)
+- [Event Contracts](https://docs.dreamdex.io/developers/event-contracts.md)
+- [Recipes](https://docs.dreamdex.io/developers/event-contracts/recipes.md)
+- [Market Structure & Lifecycle](https://docs.dreamdex.io/developers/event-contracts/market-structure.md)
+- [Contracts & Addresses](https://docs.dreamdex.io/developers/event-contracts/contracts-and-addresses.md)
+- [Gotchas](https://docs.dreamdex.io/developers/event-contracts/gotchas.md)
+- [WebSocket API](https://docs.dreamdex.io/developers/websocket-api.md)
+- [Real-Time Feed](https://docs.dreamdex.io/developers/websocket-api/real-time-feed.md): WebSocket API for receiving real-time information about market state.
+- [Operations](https://docs.dreamdex.io/developers/websocket-api/operations.md)
+- [Errors](https://docs.dreamdex.io/developers/websocket-api/errors.md)
+- [Risks](https://docs.dreamdex.io/security/risks.md)
+- [Audits](https://docs.dreamdex.io/security/audits.md)
+
+
+---
+
+# Agent Instructions
+This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
+
+## Querying This Documentation
+If you need additional information, you can query the documentation dynamically by asking a question.
+Perform an HTTP GET request on a page URL with the `ask` query parameter:
+```
+GET https://docs.dreamdex.io/welcome/readme.md?ask=<question>
+```
+The question should be specific, self-contained, and written in natural language.
+The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
+Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

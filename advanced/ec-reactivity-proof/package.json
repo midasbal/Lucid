@@ -1,0 +1,27 @@
+{
+  "name": "ec-reactivity-proof",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "gen-key": "tsx src/01-gen-key.ts",
+    "deploy": "tsx src/02-deploy.ts",
+    "subscribe": "tsx src/03-subscribe.ts",
+    "verify": "tsx src/04-verify.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@dreamdex-bot-kit/ec-core": "*",
+    "@dreamdex-bot-kit/ec-pricing": "*",
+    "@somnia-chain/reactivity": "0.2.1",
+    "@somnia-chain/reactivity-contracts": "0.2.1",
+    "dotenv": "^16.4.5",
+    "solc": "0.8.30",
+    "viem": "^2.30.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}

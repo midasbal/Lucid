@@ -1,0 +1,35 @@
+{
+  "name": "@dreamdex-bot-kit/lucid-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared client library for Lucid's maker and app: market data, fair-value pricing, order building, and non-custodial auto-redeem enrollment on DreamDEX event contracts. Real testnet only.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "verify": "tsx scripts/verify.ts"
+  },
+  "dependencies": {
+    "@dreamdex-bot-kit/ec-core": "*",
+    "@dreamdex-bot-kit/ec-pricing": "*",
+    "@somnia-chain/markets-sdk": "0.25.0",
+    "viem": "^2.30.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "dotenv": "^16.4.5",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.6"
+  }
+}
