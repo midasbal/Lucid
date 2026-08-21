@@ -50,6 +50,7 @@ A market's fair value is computed from four live inputs (spot, opening price, ti
 | [`packages/ec-core`](packages/ec-core) | Lower-level live market resolution, order placement, cancellation, and position helpers that `lucid-core` reuses rather than reimplements. |
 | [`strategies/lucid-maker`](strategies/lucid-maker) | The single-capital fair-value market maker. |
 | [`advanced/ec-reactivity-proof`](advanced/ec-reactivity-proof) | The `AutoRedeemHandler` contract and the scripts that proved it, end to end, on live testnet. |
+| [`apps/lucid-web`](apps/lucid-web) | The browser app: a live board, real charts, non-custodial trading, and one-signature auto-redeem enrollment. |
 
 The remaining packages, strategies, and examples in this repository (`packages/core`, the spot-market strategies, `examples/`) are the starting point this project was built on top of; see Credits.
 
@@ -63,7 +64,9 @@ Live and proven on Shannon testnet, each backed by a real transaction history: t
 
 An on-chain reactive execution layer now exists alongside the off-chain makers: a deployed contract that rests both sides of a quote and cancels the other side itself the instant one fills, no relayer, no polling, and no off-chain process in that loop at all, driven directly by Somnia's reactivity precompile. This was proven live, same block, for a single market, together with a continuous agent loop on top of it that recomputes fair value every cycle and requotes whichever side has drifted or gone quiet after a reactive cancel.
 
-Not yet built: a user-facing app, and multi-market operation for the reactive execution layer, which still runs one market at a time. Everything above is a set of libraries, bots, and contracts; there is no frontend or hosted service yet.
+A user-facing app now exists as well, `apps/lucid-web`: a browser app, wallet connection via wagmi and viem, that shows every open market with its own model-implied fair value next to the real order book, a price chart rendered straight from live data, a market detail view with the connected wallet's own position and cost basis, non-custodial trading, and, the point of the whole settlement side of this project, arming auto-redeem for a held position in one wallet signature so it pays out automatically on resolution with no custody of funds by Lucid at any point. Proven live on Shannon testnet with a real funded account, both headless and by hand.
+
+Not yet built: multi-market operation for the reactive execution layer, which still runs one market at a time, and the app does not yet expose the maker or the reactive agent themselves, only the trading and settlement surface a holder needs.
 
 ## Running the key pieces
 
@@ -71,6 +74,12 @@ Install dependencies from the repository root:
 
 ```bash
 npm install
+```
+
+Run the app (see [`apps/lucid-web`](apps/lucid-web) for the full account, including the browser-compatibility work it took to get lucid-core running client-side):
+
+```bash
+npm run dev -w @dreamdex-bot-kit/lucid-web
 ```
 
 Run the maker's fair-value quoting logic, dry run by default (see [`strategies/lucid-maker`](strategies/lucid-maker) for full configuration):
