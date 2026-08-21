@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lucid</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // ec-core (a Node CLI library lucid-core pulls in) reads process.env
+      // directly. vite-plugin-node-polyfills injects a process shim per
+      // module that references the bare identifier, which proved flaky in
+      // practice: an intermittent "Cannot read properties of undefined"
+      // deep in the bundled deps chunk, worked on some loads and not
+      // others depending on dependency-optimization timing. This plain,
+      // synchronous script runs before any bundled module, so a real
+      // process.env object exists as a stable global from the very first
+      // line any later code can execute, no injection timing involved.
+      window.process = window.process || { env: {}, cwd: function () { return "/"; } };
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
