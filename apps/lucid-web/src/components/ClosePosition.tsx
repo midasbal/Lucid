@@ -5,6 +5,7 @@ import { sellableSize, type EcContext } from "@dreamdex-bot-kit/ec-core";
 import type { AccountPosition } from "@dreamdex-bot-kit/lucid-core";
 import type { BoardRow } from "../lib/useBoard";
 import { somniaShannon } from "../lib/chain";
+import { isValidTradeSize } from "../lib/tradeMessage";
 
 type Phase = "idle" | "submitting" | "done" | "error";
 
@@ -59,6 +60,12 @@ function CloseRow({
 
   async function close() {
     if (!walletClient || crossPrice === null) return;
+    if (!isValidTradeSize(size)) {
+      setPhase("error");
+      setMessage("enter a size greater than zero");
+      setHash(null);
+      return;
+    }
     setPhase("submitting");
     setMessage(null);
     setHash(null);
@@ -110,7 +117,7 @@ function CloseRow({
       <button
         className="btn"
         data-testid={`close-button-${outcome.toLowerCase()}`}
-        disabled={phase === "submitting" || crossPrice === null || size <= 0}
+        disabled={phase === "submitting" || crossPrice === null || !isValidTradeSize(size)}
         onClick={close}
       >
         {phase === "submitting" ? "closing…" : `close at ~${crossPrice !== null ? crossPrice.toFixed(3) : "-"}`}

@@ -4,6 +4,7 @@ import { createLucidContext, submitOrder, type LucidContext, type AccountPositio
 import type { BoardRow } from "../lib/useBoard";
 import { somniaShannon } from "../lib/chain";
 import { ClosePosition } from "./ClosePosition";
+import { isValidTradeSize, describeTradeResult } from "../lib/tradeMessage";
 
 type Phase = "idle" | "submitting" | "done" | "error";
 
@@ -35,6 +36,12 @@ export function TradePanel({ row, position, onFilled }: { row: BoardRow | null; 
     if (!row || !walletClient) return;
     const price = outcome === "YES" ? yesPrice : noPrice;
     if (price === null) return;
+    if (!isValidTradeSize(size)) {
+      setPhase("error");
+      setMessage("enter a size greater than zero");
+      setHash(null);
+      return;
+    }
 
     setPhase("submitting");
     setMessage(null);
@@ -52,7 +59,7 @@ export function TradePanel({ row, position, onFilled }: { row: BoardRow | null; 
       });
       setPhase("done");
       setHash(result.hash ?? null);
-      setMessage(`${outcome} ${result.filled > 0 ? `filled ${result.filled.toFixed(3)}` : "sent, no fill"} at ~${price.toFixed(3)}`);
+      setMessage(describeTradeResult(outcome, price, result));
       if (result.filled > 0) onFilled?.();
     } catch (e) {
       setPhase("error");
@@ -76,7 +83,7 @@ export function TradePanel({ row, position, onFilled }: { row: BoardRow | null; 
             <button
               className="side-btn yes"
               data-testid="trade-yes"
-              disabled={!canTrade || phase === "submitting" || yesPrice === null}
+              disabled={!canTrade || phase === "submitting" || yesPrice === null || !isValidTradeSize(size)}
               onClick={() => trade("YES")}
             >
               <span className="side-label">buy YES</span>
@@ -85,7 +92,7 @@ export function TradePanel({ row, position, onFilled }: { row: BoardRow | null; 
             <button
               className="side-btn no"
               data-testid="trade-no"
-              disabled={!canTrade || phase === "submitting" || noPrice === null}
+              disabled={!canTrade || phase === "submitting" || noPrice === null || !isValidTradeSize(size)}
               onClick={() => trade("NO")}
             >
               <span className="side-label">buy NO</span>
