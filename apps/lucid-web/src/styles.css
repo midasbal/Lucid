@@ -700,3 +700,77 @@ body {
   font-size: 11px;
   word-break: break-all;
 }
+
+/* view tabs */
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+}
+
+.view-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.tab-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+}
+
+.tab-btn:hover {
+  color: var(--text-dim);
+}
+
+.tab-btn.active {
+  background: var(--bg-raised);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+/* portfolio */
+
+.portfolio-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 26px;
+  align-items: baseline;
+}
+
+.portfolio-row {
+  padding: 12px 14px;
+  background: var(--bg-raised);
+}
+
+.portfolio-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.portfolio-question {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  margin-left: 8px;
+}
+
+.portfolio-row-bottom {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
