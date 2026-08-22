@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAccount, usePublicClient } from "wagmi";
 import type { LucidContext } from "@dreamdex-bot-kit/lucid-core";
 import { usePortfolio } from "../lib/usePortfolio";
@@ -17,7 +18,8 @@ export function Portfolio({
 }) {
   const { address, isConnected } = useAccount();
   const publicClient = usePublicClient({ chainId: somniaShannon.id });
-  const { open, history, summary, loading, error, refreshedAt } = usePortfolio(ctx, address, publicClient);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { open, history, summary, loading, error, refreshedAt } = usePortfolio(ctx, address, publicClient, refreshKey);
 
   if (!isConnected) {
     return (
@@ -32,7 +34,14 @@ export function Portfolio({
     <div className="market-detail" data-testid="portfolio-view">
       <PortfolioSummaryStrip summary={summary} />
       {refreshedAt && <p className="disclaimer">updated {new Date(refreshedAt).toLocaleTimeString()}</p>}
-      <OpenPositionsList positions={open} loading={loading} error={error} onOpenMarket={onOpenMarket} onViewResolution={onViewResolution} />
+      <OpenPositionsList
+        positions={open}
+        loading={loading}
+        error={error}
+        onOpenMarket={onOpenMarket}
+        onViewResolution={onViewResolution}
+        onClaimed={() => setRefreshKey((k) => k + 1)}
+      />
       <HistoryList history={history} loading={loading} error={error} />
     </div>
   );

@@ -1,4 +1,5 @@
 import type { OpenPosition } from "../lib/portfolio";
+import { ClaimAction } from "./ClaimAction";
 
 function pnlClass(v: number | undefined): string {
   if (v === undefined) return "";
@@ -11,6 +12,7 @@ export function OpenPositionsList({
   error,
   onOpenMarket,
   onViewResolution,
+  onClaimed,
 }: {
   positions: OpenPosition[];
   loading: boolean;
@@ -22,6 +24,9 @@ export function OpenPositionsList({
    *  a position whose market already finalized (no live symbol to route
    *  through onOpenMarket with, keyed by marketId instead). */
   onViewResolution: (marketId: string) => void;
+  /** A direct claim landed; refresh the portfolio so the redeemed row drops
+   *  off this list and the redemption shows up in history. */
+  onClaimed: () => void;
 }) {
   const hasStaleUnarmed = positions.some((p) => p.status === "settled" && p.armed === false);
 
@@ -89,6 +94,18 @@ export function OpenPositionsList({
                         {p.status === "trading" && p.armed === false ? "arm" : "open"}
                       </button>
                     )}
+                    {p.status === "settled" && p.claimable && (
+                      <ClaimAction
+                        marketId={p.marketId}
+                        symbol={p.symbol}
+                        onchain={p.onchain}
+                        outcomeIdx={p.outcomeIdx}
+                        label={label}
+                        estimatedPayout={p.markValue}
+                        note={p.armed === true ? "armed, but not yet redeemed. claim directly" : undefined}
+                        onClaimed={onClaimed}
+                      />
+                    )}
                     {!p.symbol && p.status === "settled" && (
                       <button className="btn" data-testid="open-position-resolution" onClick={() => onViewResolution(p.marketId)}>
                         view resolution
@@ -106,7 +123,8 @@ export function OpenPositionsList({
         <p className="disclaimer">
           * these positions already finalized before an auto-redeem authorization existed for them. Arming now would
           register correctly but the reactive handler only fires on a future finalization, not retroactively, so it
-          would never trigger. These need a direct redeem instead, not built into this view yet.
+          would never trigger. A winning or voided position claims directly instead, the button above; a losing
+          position has nothing to claim.
         </p>
       )}
     </div>

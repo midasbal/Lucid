@@ -11,6 +11,7 @@ import { fetchAccountFills, fetchOpenBalances, fetchRedemptions, type OpenBalanc
 import { computeCostBasis, type OutcomeCostBasis } from "./costBasis";
 import { readArmedStatus } from "./autoRedeem";
 import { AUTO_REDEEM_HANDLER } from "./handler";
+import { settlementMarkPrice } from "./claim";
 
 export interface OpenPosition {
   marketId: string;
@@ -19,16 +20,20 @@ export interface OpenPosition {
   outcomeIdx: 0 | 1;
   balance: number;
   /** "trading": the market is still live, marked to ec-pricing's fair value.
-   *  "settled": the oracle has already answered; marked to the deterministic
-   *  payout this codebase's own settlement rules assume (ec-core's
-   *  claimableOutcomes: winner 1:1, loser 0, voided 0.5:1), not a model
-   *  guess, since the outcome is already known. */
+   *  "settled": the oracle has already answered; marked to the fee-aware
+   *  settlement payout (claim.ts's settlementMarkPrice, backed by ec-core's
+   *  estimatePayout, the same function a real claim pays out through), not
+   *  a model guess, since the outcome is already known. */
   status: "trading" | "settled";
   markPrice: number;
   markValue: number;
   costBasis: OutcomeCostBasis;
   unrealizedPnl: number | undefined;
   armed: boolean | null;
+  /** True when this position has something to claim right now: a settled
+   *  position on the winning side, or any held side of a voided market.
+   *  A lost, non-voided position is never claimable. */
+  claimable: boolean;
   onchain: MarketOnchain;
   /** Set only for "trading" positions, needed to route into the existing
    *  market detail / auto-redeem flow, which is keyed by symbol. */
@@ -64,15 +69,6 @@ export async function resolveOnchainById(ctx: LucidContext, marketId: string): P
   return ctx.exchange.client.getMarketOnchain(marketId as `0x${string}`);
 }
 
-/** The deterministic per-share payout for an already-resolved market,
- *  ec-core's settlement.ts's own assumption (claimableOutcomes): the winner
- *  redeems 1:1, the loser 0, a voided market refunds both sides at 0.5:1.
- *  Not a model estimate, the outcome is already fixed. */
-export function settlementMarkPrice(onchain: MarketOnchain, outcomeIdx: 0 | 1): number {
-  if (onchain.isVoided) return 0.5;
-  return onchain.winningOutcome === outcomeIdx ? 1 : 0;
-}
-
 /**
  * Every market this account currently holds a nonzero balance on, resolved
  * and priced. Markets still trading are marked to ec-pricing's live fair
@@ -104,7 +100,7 @@ export async function loadOpenPositions(ctx: LucidContext, account: `0x${string}
 
       if (resolved) {
         status = "settled";
-        markPrice = settlementMarkPrice(onchain, outcomeIdx);
+        markPrice = await settlementMarkPrice(ctx, row.marketId, onchain, outcomeIdx);
       } else {
         status = "trading";
         symbol = liveMarketIdToSymbol.get(row.marketId.toLowerCase()) ?? null;
@@ -132,6 +128,8 @@ export async function loadOpenPositions(ctx: LucidContext, account: `0x${string}
         armed = null;
       }
 
+      const claimable = status === "settled" && Number.isFinite(markPrice) && markPrice > 0 && balance > 0;
+
       positions.push({
         marketId: row.marketId,
         asset: row.market.asset,
@@ -144,6 +142,7 @@ export async function loadOpenPositions(ctx: LucidContext, account: `0x${string}
         costBasis,
         unrealizedPnl,
         armed,
+        claimable,
         onchain,
         symbol,
       });

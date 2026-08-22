@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
-import { createLucidContext, submitOrder, type LucidContext } from "@dreamdex-bot-kit/lucid-core";
+import { createLucidContext, submitOrder, type LucidContext, type AccountPosition } from "@dreamdex-bot-kit/lucid-core";
 import type { BoardRow } from "../lib/useBoard";
 import { somniaShannon } from "../lib/chain";
+import { ClosePosition } from "./ClosePosition";
 
 type Phase = "idle" | "submitting" | "done" | "error";
 
@@ -10,7 +11,7 @@ function clampProb(p: number): number {
   return Math.min(0.99, Math.max(0.01, p));
 }
 
-export function TradePanel({ row, onFilled }: { row: BoardRow | null; onFilled?: () => void }) {
+export function TradePanel({ row, position, onFilled }: { row: BoardRow | null; position?: AccountPosition | null; onFilled?: () => void }) {
   const { isConnected, chainId } = useAccount();
   const { data: walletClient } = useWalletClient();
   const [phase, setPhase] = useState<Phase>("idle");
@@ -104,6 +105,8 @@ export function TradePanel({ row, onFilled }: { row: BoardRow | null; onFilled?:
               onChange={(e) => setSize(Number(e.target.value))}
             />
           </div>
+
+          {row && position && <ClosePosition row={row} position={position} onFilled={onFilled} />}
         </>
       )}
 

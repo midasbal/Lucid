@@ -938,3 +938,64 @@ body {
 .trust-criterion-summary {
   color: var(--text-faint);
 }
+
+/* claim action */
+
+.claim-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  max-width: 220px;
+}
+
+.claim-action .redeem-explain {
+  text-align: right;
+  margin: 0;
+}
+
+.claim-done {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.claim-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+/* close-position (sell-to-close) */
+
+.close-position {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.close-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.close-row input {
+  width: 84px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.close-preview {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-faint);
+}

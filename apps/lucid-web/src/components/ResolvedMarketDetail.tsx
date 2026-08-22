@@ -1,12 +1,22 @@
 import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
 import type { LucidContext } from "@dreamdex-bot-kit/lucid-core";
+import type { MarketOnchain } from "@somnia-chain/markets-sdk";
 import { fetchMarketResolution, type MarketResolution } from "../lib/indexer";
+import { resolveOnchainById } from "../lib/portfolio";
+import { findClaimable, type ClaimableSide } from "../lib/claim";
 import { OracleTrustPanel } from "./OracleTrustPanel";
+import { ClaimAction } from "./ClaimAction";
 
 interface State {
   loading: boolean;
   resolution: MarketResolution | null;
   error: string | null;
+}
+
+interface ClaimState {
+  onchain: MarketOnchain | null;
+  claimable: ClaimableSide[];
 }
 
 /**
@@ -18,7 +28,10 @@ interface State {
  * resolved market has long since dropped off the board).
  */
 export function ResolvedMarketDetail({ marketId, ctx, onBack }: { marketId: string; ctx: LucidContext; onBack: () => void }) {
+  const { address } = useAccount();
   const [state, setState] = useState<State>({ loading: true, resolution: null, error: null });
+  const [claim, setClaim] = useState<ClaimState>({ onchain: null, claimable: [] });
+  const [claimRefresh, setClaimRefresh] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -34,6 +47,25 @@ export function ResolvedMarketDetail({ marketId, ctx, onBack }: { marketId: stri
       cancelled = true;
     };
   }, [ctx, marketId]);
+
+  useEffect(() => {
+    if (!address) {
+      setClaim({ onchain: null, claimable: [] });
+      return;
+    }
+    let cancelled = false;
+    resolveOnchainById(ctx, marketId)
+      .then(async (onchain) => {
+        const claimable = await findClaimable(ctx, marketId, onchain, address);
+        if (!cancelled) setClaim({ onchain, claimable });
+      })
+      .catch(() => {
+        if (!cancelled) setClaim({ onchain: null, claimable: [] });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [ctx, marketId, address, claimRefresh]);
 
   const r = state.resolution;
   const outcomeLabel = r ? (r.voided ? "voided" : r.outcomeIdx === 0 ? "YES" : "NO") : null;
@@ -72,6 +104,30 @@ export function ResolvedMarketDetail({ marketId, ctx, onBack }: { marketId: stri
           <div className="empty-state">
             no on-chain resolution record found for this market on this venue, it may belong to a different venue or predate this
             indexer's retention
+          </div>
+        </div>
+      )}
+
+      {claim.onchain && claim.claimable.length > 0 && (
+        <div className="panel" data-testid="resolved-claim-panel">
+          <h2 className="section-title">Your position</h2>
+          <div className="claim-list">
+            {claim.claimable.map((c) => {
+              const decimals = claim.onchain!.decimals;
+              const label = c.outcomeIdx === 0 ? "YES" : "NO";
+              return (
+                <ClaimAction
+                  key={c.outcomeIdx}
+                  marketId={marketId}
+                  symbol={null}
+                  onchain={claim.onchain!}
+                  outcomeIdx={c.outcomeIdx}
+                  label={label}
+                  estimatedPayout={Number(c.payout) / 10 ** decimals}
+                  onClaimed={() => setClaimRefresh((k) => k + 1)}
+                />
+              );
+            })}
           </div>
         </div>
       )}

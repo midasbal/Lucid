@@ -56,7 +56,7 @@ export function MarketDetail({ row, ctx }: { row: BoardRow; ctx: LucidContext })
       <div className="detail-grid">
         <OrderBook book={row.fv.book} />
         <div>
-          <TradePanel row={row} onFilled={() => setRefreshKey((k) => k + 1)} />
+          <TradePanel row={row} position={position} onFilled={() => setRefreshKey((k) => k + 1)} />
         </div>
       </div>
 
