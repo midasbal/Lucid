@@ -76,6 +76,12 @@ export interface MarketDefinition {
   lotSize: bigint;
   status: number;
   finalized: boolean;
+  /** The spot reading this call already fetched to infer openingPrice's
+   *  scale, exposed so a caller that also needs spot (getFairValueWithBook)
+   *  can reuse it instead of fetching it again. Null when there was no
+   *  opening price to scale against yet, the one case this call never
+   *  fetched spot at all. */
+  spot: number | null;
 }
 
 /**
@@ -98,12 +104,14 @@ export async function getMarketDefinition(ctx: LucidContext, market: UnifiedMark
   });
 
   let openingPrice: number | null = null;
+  let spot: number | null = null;
   const openings = await getOpeningPrices([market.info.marketId], ctx.config.indexerUrl);
   const raw = openings[market.info.marketId.toLowerCase()];
   if (raw !== null && raw !== undefined && market.info.asset) {
     const price = await ctx.exchange.fetchPrice(market.info.asset);
     if (price) {
-      const scale = inferScale(Number(raw), price.price);
+      spot = price.price;
+      const scale = inferScale(Number(raw), spot);
       openingPrice = Number(raw) * scale;
     }
   }
@@ -125,6 +133,7 @@ export async function getMarketDefinition(ctx: LucidContext, market: UnifiedMark
     lotSize: params.lotSize,
     status: onchain.status,
     finalized: onchain.finalized,
+    spot,
   };
 }
 

@@ -11,11 +11,13 @@ import { WalletBar } from "./components/WalletBar";
 type View = "markets" | "portfolio";
 
 export default function App() {
-  const board = useBoard();
+  const [view, setView] = useState<View>("markets");
+  // Polling costs a full indexer/RPC/oracle sweep every cycle; do not keep
+  // paying it while the user is looking at the portfolio tab instead.
+  const board = useBoard(view === "markets");
   const [selected, setSelected] = useState<string | null>(null);
   const [selectedMarketId, setSelectedMarketId] = useState<string | null>(null);
   const [resolvedMarketId, setResolvedMarketId] = useState<string | null>(null);
-  const [view, setView] = useState<View>("markets");
 
   // Never falls back to board.rows[0]: a market that drops off the live
   // board is shown as explicitly unavailable, below, not silently swapped

@@ -41,9 +41,19 @@ export async function getFairValueWithBook(ctx: LucidContext, market: UnifiedMar
 
   const book = await getOrderBook(ctx, market);
 
-  const price = await ctx.exchange.fetchPrice(asset);
-  if (!price) throw new Error(`fetchPrice(${asset}) returned null`);
-  const spot = price.price;
+  // getMarketDefinition already fetched spot once to scale openingPrice;
+  // reuse that reading instead of fetching it again for fair value. Only
+  // still-null case is when there was no opening price yet to scale
+  // against, meaning that call never fetched spot at all, so fall back to
+  // one direct fetch here, still exactly one fetch either way.
+  let spot: number;
+  if (definition.spot !== null) {
+    spot = definition.spot;
+  } else {
+    const price = await ctx.exchange.fetchPrice(asset);
+    if (!price) throw new Error(`fetchPrice(${asset}) returned null`);
+    spot = price.price;
+  }
 
   const ohlcv = await ctx.exchange.fetchPriceOHLCV(asset, "1m", Date.now() - 2 * 60 * 60 * 1000, 500);
   const samples: PriceSample[] = ohlcv.map(([ms, , , , close]) => ({ price: close, timestampMs: ms }));
