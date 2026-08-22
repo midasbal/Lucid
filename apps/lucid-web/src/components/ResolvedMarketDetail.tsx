@@ -108,29 +108,32 @@ export function ResolvedMarketDetail({ marketId, ctx, onBack }: { marketId: stri
         </div>
       )}
 
-      {claim.onchain && claim.claimable.length > 0 && (
-        <div className="panel" data-testid="resolved-claim-panel">
-          <h2 className="section-title">Your position</h2>
-          <div className="claim-list">
-            {claim.claimable.map((c) => {
-              const decimals = claim.onchain!.decimals;
-              const label = c.outcomeIdx === 0 ? "YES" : "NO";
-              return (
-                <ClaimAction
-                  key={c.outcomeIdx}
-                  marketId={marketId}
-                  symbol={null}
-                  onchain={claim.onchain!}
-                  outcomeIdx={c.outcomeIdx}
-                  label={label}
-                  estimatedPayout={Number(c.payout) / 10 ** decimals}
-                  onClaimed={() => setClaimRefresh((k) => k + 1)}
-                />
-              );
-            })}
+      {claim.onchain && claim.claimable.length > 0 && (() => {
+        const onchain = claim.onchain;
+        return (
+          <div className="panel" data-testid="resolved-claim-panel">
+            <h2 className="section-title">Your position</h2>
+            <div className="claim-list">
+              {claim.claimable.map((c) => {
+                const decimals = onchain.decimals;
+                const label = c.outcomeIdx === 0 ? "YES" : "NO";
+                return (
+                  <ClaimAction
+                    key={c.outcomeIdx}
+                    marketId={marketId}
+                    symbol={null}
+                    onchain={onchain}
+                    outcomeIdx={c.outcomeIdx}
+                    label={label}
+                    estimatedPayout={Number(c.payout) / 10 ** decimals}
+                    onClaimed={() => setClaimRefresh((k) => k + 1)}
+                  />
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {r && <OracleTrustPanel oracleQuestionId={r.oracleQuestionId} framing="resolved" marketAsset={r.asset} />}
     </div>

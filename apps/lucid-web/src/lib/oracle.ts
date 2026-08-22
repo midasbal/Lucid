@@ -10,7 +10,7 @@
 // @somnia-chain/markets-sdk at all.
 
 const ORACLE_GRAPHQL_URL = "https://prd.oracle.somnia.host/v1/graphql";
-const ORACLE_CALIBER_URL = (id: string) => `https://prd.oracle.somnia.host/api/caliber/${id}`;
+const ORACLE_CALIBER_URL = (id: string) => `https://prd.oracle.somnia.host/api/caliber/${encodeURIComponent(id)}`;
 
 export interface OracleAnswer {
   outcomeIdx: number;

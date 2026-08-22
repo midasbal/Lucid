@@ -73,8 +73,7 @@ export function PriceChart({
   const bandPath =
     highs.map((v, i) => `${i === 0 ? "M" : "L"} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ") +
     " " +
-    lows
-      .map((v, i) => v)
+    [...lows]
       .reverse()
       .map((v, i) => `L ${x(lows.length - 1 - i).toFixed(1)} ${y(v).toFixed(1)}`)
       .join(" ") +

@@ -71,8 +71,11 @@ function erf(x: number): number {
  */
 export function fairYesProbability(inputs: BinaryPriceInputs): number {
   const { spot, openingPrice, timeToExpiryYears, volatility } = inputs;
-  if (!(spot > 0) || !(openingPrice > 0)) {
-    throw new RangeError(`fairYesProbability: spot and openingPrice must be positive (got spot=${spot}, openingPrice=${openingPrice})`);
+  if (!Number.isFinite(spot) || !Number.isFinite(openingPrice) || spot <= 0 || openingPrice <= 0) {
+    throw new RangeError(`fairYesProbability: spot and openingPrice must be finite and positive (got spot=${spot}, openingPrice=${openingPrice})`);
+  }
+  if (!Number.isFinite(timeToExpiryYears)) {
+    throw new RangeError(`fairYesProbability: timeToExpiryYears must be a finite number (got ${timeToExpiryYears})`);
   }
 
   if (timeToExpiryYears <= 0 || volatility <= 0) {
