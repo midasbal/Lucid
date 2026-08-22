@@ -3,6 +3,7 @@ import { getAccountPosition, type LucidContext, type AccountPosition } from "@dr
 import type { MarketOnchain } from "@somnia-chain/markets-sdk";
 import { fetchAccountFills } from "./indexer";
 import { computeCostBasis, type CostBasis } from "./costBasis";
+import { createLatestWinsGate } from "./latestWins";
 
 export interface PositionState {
   position: AccountPosition | null;
@@ -37,21 +38,23 @@ export function usePosition(
       return;
     }
     let cancelled = false;
+    const gate = createLatestWinsGate();
     setLoading(true);
 
     async function tick() {
+      const token = gate.start();
       try {
         const [pos, fills] = await Promise.all([
           getAccountPosition(ctx, onchain!, account as `0x${string}`),
           fetchAccountFills(ctx.config.indexerUrl, marketId!, account!),
         ]);
-        if (cancelled) return;
+        if (cancelled || !gate.isCurrent(token)) return;
         setPosition(pos);
         setCostBasis(computeCostBasis(fills, account!, ctx.config.decimals));
         setError(null);
         setLoading(false);
       } catch (e) {
-        if (!cancelled) {
+        if (!cancelled && gate.isCurrent(token)) {
           setError((e as Error).message);
           setLoading(false);
         }

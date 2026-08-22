@@ -8,6 +8,7 @@ import {
   type FairValueResult,
 } from "@dreamdex-bot-kit/lucid-core";
 import type { MarketOnchain, UnifiedMarket } from "@somnia-chain/markets-sdk";
+import { createLatestWinsGate } from "./latestWins";
 
 export interface BoardRow {
   symbol: string;
@@ -47,8 +48,10 @@ export function useBoard(): BoardState {
   useEffect(() => {
     let cancelled = false;
     const ctx = ctxRef.current!;
+    const gate = createLatestWinsGate();
 
     async function tick() {
+      const token = gate.start();
       try {
         const summaries = await listLiveMarkets(ctx);
         const withHeadroom = summaries.filter((m) => m.ttlSec > 30).sort((a, b) => a.ttlSec - b.ttlSec);
@@ -68,14 +71,17 @@ export function useBoard(): BoardState {
           }
         }
 
-        if (!cancelled) {
+        // A newer tick may have already started (and possibly already
+        // committed) while this one was still fetching; a slower earlier
+        // tick must never overwrite fresher state that already landed.
+        if (!cancelled && gate.isCurrent(token)) {
           setRows(built);
           setError(null);
           setRefreshedAt(Date.now());
           setLoading(false);
         }
       } catch (e) {
-        if (!cancelled) {
+        if (!cancelled && gate.isCurrent(token)) {
           setError((e as Error).message);
           setLoading(false);
         }

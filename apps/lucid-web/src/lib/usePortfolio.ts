@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { LucidContext } from "@dreamdex-bot-kit/lucid-core";
 import type { PublicClient } from "viem";
 import { loadOpenPositions, loadHistory, summarizePortfolio, type OpenPosition, type HistoryEntry, type PortfolioSummary } from "./portfolio";
+import { createLatestWinsGate } from "./latestWins";
 
 export interface PortfolioState {
   open: OpenPosition[];
@@ -31,23 +32,25 @@ export function usePortfolio(ctx: LucidContext, account: string | undefined, pub
       return;
     }
     let cancelled = false;
+    const gate = createLatestWinsGate();
     setLoading(true);
 
     async function tick() {
+      const token = gate.start();
       try {
         const acc = account as `0x${string}`;
         const [openPositions, historyEntries] = await Promise.all([
           loadOpenPositions(ctx, acc, publicClient!),
           loadHistory(ctx, acc),
         ]);
-        if (cancelled) return;
+        if (cancelled || !gate.isCurrent(token)) return;
         setOpen(openPositions);
         setHistory(historyEntries);
         setError(null);
         setRefreshedAt(Date.now());
         setLoading(false);
       } catch (e) {
-        if (!cancelled) {
+        if (!cancelled && gate.isCurrent(token)) {
           setError((e as Error).message);
           setLoading(false);
         }
