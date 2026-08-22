@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useBoard } from "./lib/useBoard";
+import { resolveSelectedRow } from "./lib/selection";
 import { LiveBoard } from "./components/LiveBoard";
 import { MarketDetail } from "./components/MarketDetail";
+import { MarketUnavailable } from "./components/MarketUnavailable";
 import { ResolvedMarketDetail } from "./components/ResolvedMarketDetail";
 import { Portfolio } from "./components/Portfolio";
 import { WalletBar } from "./components/WalletBar";
@@ -11,15 +13,33 @@ type View = "markets" | "portfolio";
 export default function App() {
   const board = useBoard();
   const [selected, setSelected] = useState<string | null>(null);
+  const [selectedMarketId, setSelectedMarketId] = useState<string | null>(null);
   const [resolvedMarketId, setResolvedMarketId] = useState<string | null>(null);
   const [view, setView] = useState<View>("markets");
 
-  const selectedRow = board.rows.find((r) => r.symbol === selected) ?? board.rows[0] ?? null;
+  // Never falls back to board.rows[0]: a market that drops off the live
+  // board is shown as explicitly unavailable, below, not silently swapped
+  // for a different one.
+  const selectedRow = resolveSelectedRow(board.rows, selected);
+
+  // Remember the marketId for the currently selected symbol so it can still
+  // be resolved directly (MarketUnavailable) once it is no longer on the
+  // board and selectedRow itself goes null.
+  useEffect(() => {
+    if (selectedRow) setSelectedMarketId(selectedRow.marketId);
+  }, [selectedRow]);
 
   function openMarket(symbol: string) {
     setSelected(symbol);
+    setSelectedMarketId(null);
     setResolvedMarketId(null);
     setView("markets");
+  }
+
+  function backToBoard() {
+    setSelected(null);
+    setSelectedMarketId(null);
+    setResolvedMarketId(null);
   }
 
   function viewResolution(marketId: string) {
@@ -65,9 +85,11 @@ export default function App() {
           />
 
           {resolvedMarketId ? (
-            <ResolvedMarketDetail marketId={resolvedMarketId} ctx={board.ctx} onBack={() => setResolvedMarketId(null)} />
+            <ResolvedMarketDetail marketId={resolvedMarketId} ctx={board.ctx} onBack={backToBoard} />
           ) : selectedRow ? (
             <MarketDetail row={selectedRow} ctx={board.ctx} />
+          ) : selected ? (
+            <MarketUnavailable symbol={selected} marketId={selectedMarketId} ctx={board.ctx} onBack={backToBoard} onResolved={viewResolution} />
           ) : (
             <div className="panel">
               <div className="empty-state">select a market on the board</div>
