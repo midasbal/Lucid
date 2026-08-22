@@ -25,11 +25,21 @@ import { AUTO_REDEEM_HANDLER } from "../src/lib/handler";
 // computed for its own rendering, not recomputed with different code.
 
 const PRIVATE_KEY = process.env.LUCID_TEST_PRIVATE_KEY as `0x${string}` | undefined;
+const BINARY_MODULE = "0x3ecC694Cef705358864a646142ac17A90E29e388" as const;
 
 const HANDLER_READ_ABI = parseAbi([
   "function auths(uint256, uint256) view returns (address owner, uint256 amount, uint256 deadline, uint256 nonce, bytes sig, uint32 operatorId, bytes32 venueId, bytes32 marketId, bool redeemed)",
 ]);
-const ERC6909_READ_ABI = parseAbi(["function isOperator(address owner, address spender) view returns (bool)"]);
+const ERC6909_READ_ABI = parseAbi([
+  "function isOperator(address owner, address spender) view returns (bool)",
+  "function balanceOf(address owner, uint256 id) view returns (uint256)",
+]);
+// Same positional ABI claim.spec.ts and close.spec.ts already proved live
+// against this exact call; the SDK's own documented shape for this
+// function does not match the deployed bytecode's real return layout.
+const MODULE_ABI = parseAbi([
+  "function markets(bytes32) view returns (uint32,uint32,bytes32,address,uint64,uint64,uint64,uint64,address,address,uint256,uint256,bytes32,uint64)",
+]);
 
 test("connected wallet takes a position and arms auto-redeem", async ({ page }) => {
   test.skip(!PRIVATE_KEY, "set LUCID_TEST_PRIVATE_KEY to a funded Shannon testnet key to run this test");
@@ -87,6 +97,7 @@ test("connected wallet takes a position and arms auto-redeem", async ({ page }) 
   // starts in, and prove either one.
   const alreadyArmed = await page.getByTestId("armed-badge-yes").isVisible();
   const enrollHashes: string[] = [];
+  let freshBalanceAtArmTime: bigint | null = null;
 
   if (alreadyArmed) {
     console.log("ALREADY ARMED from an earlier run, verifying the read rather than re-arming");
@@ -106,6 +117,19 @@ test("connected wallet takes a position and arms auto-redeem", async ({ page }) 
       expect(receipt.status).toBe("success");
     }
     console.log(`ENROLLMENT TX HASHES: ${enrollHashes.join(", ")}`);
+
+    // Independent proof the signed amount never passed through a float
+    // round trip: read this exact market's yesId off the module directly,
+    // then the account's own raw ERC-6909 balance for it, right after
+    // arming (arming itself never moves outcome tokens, only sets an
+    // operator approval and registers the authorization, so this balance
+    // is the same one that was armed for). Compared below against the
+    // handler's own stored amount.
+    const marketId = (await redeemRow.getAttribute("data-market-id"))! as `0x${string}`;
+    const onchainTuple = await publicClient.readContract({ address: BINARY_MODULE, abi: MODULE_ABI, functionName: "markets", args: [marketId] });
+    const yesId = onchainTuple[10];
+    freshBalanceAtArmTime = await publicClient.readContract({ address: outcomeToken, abi: ERC6909_READ_ABI, functionName: "balanceOf", args: [account.address, yesId] });
+    console.log(`independent fresh raw balance read right after arming: ${freshBalanceAtArmTime}`);
   }
 
   // Independent on-chain verification: read the handler's own storage
@@ -120,6 +144,14 @@ test("connected wallet takes a position and arms auto-redeem", async ({ page }) 
   expect(storedOwner.toLowerCase()).toBe(account.address.toLowerCase());
   expect(storedAmount).toBeGreaterThan(0n);
   expect(redeemed).toBe(false);
+
+  if (freshBalanceAtArmTime !== null) {
+    // The real proof for this pass: the amount signed and stored on-chain
+    // is exactly the raw balance read independently at arm time, not a
+    // value reconstructed through balance * 10**decimals and Math.round.
+    expect(storedAmount).toBe(freshBalanceAtArmTime);
+    console.log(`confirmed: signed amount ${storedAmount} equals the independently read raw balance exactly`);
+  }
 
   const isOperator = await publicClient.readContract({
     address: outcomeToken,

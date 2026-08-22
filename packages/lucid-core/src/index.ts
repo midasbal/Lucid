@@ -21,3 +21,5 @@ export { getFairValueWithBook, type FairValueResult, type FairValueOptions } fro
 export { submitOrder, cancelOrder, type BuildOrderParams } from "./trading.js";
 
 export { enrollAutoRedeem, type EnrollAutoRedeemParams, type EnrollAutoRedeemResult } from "./redeem.js";
+
+export { toHuman, toRaw } from "./units.js";

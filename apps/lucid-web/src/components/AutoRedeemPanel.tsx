@@ -85,7 +85,19 @@ function OutcomeArmRow({
 
       setState({ phase: "signing", message: "signing the redeem authorization and registering it", txHashes: hashes });
       const lucidCtx = createLucidContext({ walletClient });
-      const amount = BigInt(Math.round(balance * 10 ** ctx.config.decimals));
+      // The amount embedded in a signed RedeemAuthorization should never
+      // pass through a float. `balance` here already went through one
+      // BigInt-to-Number conversion upstream (getAccountPosition); reading
+      // a fresh raw balance directly, the same pattern ClaimAction.tsx
+      // already uses for the direct-claim path, avoids reconstructing it
+      // through balance * 10**decimals and Math.round entirely, rather
+      // than merely keeping that reconstruction safe.
+      const id = outcomeIdx === 0 ? row.onchain.yesId : row.onchain.noId;
+      const amount = await lucidCtx.exchange.client.getOutcomeBalance({ outcomeToken: row.onchain.outcomeToken, account: address, id });
+      if (amount <= 0n) {
+        setState({ phase: "error", message: "nothing left to arm, this position's balance is now zero", txHashes: hashes });
+        return;
+      }
       const result = await enrollAutoRedeem(lucidCtx, walletClient, {
         handlerAddress: AUTO_REDEEM_HANDLER,
         marketId: row.marketId as `0x${string}`,
