@@ -55,6 +55,16 @@ function OutcomeArmRow({
 
   async function arm() {
     if (!walletClient || !publicClient || !address) return;
+    // A market can resolve while this page is still open (the row's own
+    // onchain snapshot goes stale). Arming an already-resolved position
+    // registers a real authorization that can never pay, reactivity is not
+    // retroactive (PROOF.md). Caught here rather than left to surface as a
+    // silent, permanently-unpaid arm; a direct claim is the correct action
+    // once a market has actually resolved.
+    if (row.onchain.isResolved || row.onchain.isVoided) {
+      setState({ phase: "error", message: "this market already resolved while this page was open. arming now would never pay out, claim it directly from the portfolio instead", txHashes: [] });
+      return;
+    }
     const hashes: string[] = [];
     try {
       const binaryModule = ctx.config.addresses.binaryModule as `0x${string}`;
