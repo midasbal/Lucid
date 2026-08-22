@@ -9,6 +9,7 @@ import { OrderBook } from "./OrderBook";
 import { TradePanel } from "./TradePanel";
 import { PositionPanel } from "./PositionPanel";
 import { AutoRedeemPanel } from "./AutoRedeemPanel";
+import { OracleTrustPanel } from "./OracleTrustPanel";
 
 function fmtTtl(sec: number): string {
   if (sec < 60) return `${Math.round(sec)}s`;
@@ -63,6 +64,12 @@ export function MarketDetail({ row, ctx }: { row: BoardRow; ctx: LucidContext })
         <PositionPanel position={position} costBasis={costBasis} fairYes={row.fv.fairYes} loading={positionLoading} error={positionError} />
         <AutoRedeemPanel row={row} ctx={ctx} position={position} />
       </div>
+
+      <OracleTrustPanel
+        oracleQuestionId={row.market.info.marketType === "BINARY" ? (row.market.info.oracleQuestionId ?? null) : null}
+        framing="pending"
+        marketAsset={row.asset}
+      />
     </div>
   );
 }

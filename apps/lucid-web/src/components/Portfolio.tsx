@@ -6,7 +6,15 @@ import { OpenPositionsList } from "./OpenPositionsList";
 import { HistoryList } from "./HistoryList";
 import { somniaShannon } from "../lib/chain";
 
-export function Portfolio({ ctx, onOpenMarket }: { ctx: LucidContext; onOpenMarket: (symbol: string) => void }) {
+export function Portfolio({
+  ctx,
+  onOpenMarket,
+  onViewResolution,
+}: {
+  ctx: LucidContext;
+  onOpenMarket: (symbol: string) => void;
+  onViewResolution: (marketId: string) => void;
+}) {
   const { address, isConnected } = useAccount();
   const publicClient = usePublicClient({ chainId: somniaShannon.id });
   const { open, history, summary, loading, error, refreshedAt } = usePortfolio(ctx, address, publicClient);
@@ -24,7 +32,7 @@ export function Portfolio({ ctx, onOpenMarket }: { ctx: LucidContext; onOpenMark
     <div className="market-detail" data-testid="portfolio-view">
       <PortfolioSummaryStrip summary={summary} />
       {refreshedAt && <p className="disclaimer">updated {new Date(refreshedAt).toLocaleTimeString()}</p>}
-      <OpenPositionsList positions={open} loading={loading} error={error} onOpenMarket={onOpenMarket} />
+      <OpenPositionsList positions={open} loading={loading} error={error} onOpenMarket={onOpenMarket} onViewResolution={onViewResolution} />
       <HistoryList history={history} loading={loading} error={error} />
     </div>
   );

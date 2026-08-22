@@ -78,6 +78,76 @@ export async function fetchAccountFills(indexerUrl: string, marketId: string, ac
   return json.data?.Fill ?? [];
 }
 
+export interface MarketResolution {
+  marketId: string;
+  asset: string;
+  question: string;
+  outcomeIdx: number;
+  payoutNumerators: string[];
+  voided: boolean;
+  timestamp: string;
+  /** The join key into the oracle's own service (oracle.ts), confirmed live
+   *  to equal the market row's own oracleQuestionId field once resolved
+   *  (TRUST-PANEL.md). This is the reliable source: unlike the market row's
+   *  field, this only ever exists once the market has actually resolved,
+   *  so there is no stale-value risk the way a still-Trading market's own
+   *  oracleQuestionId field carries (see TRUST-PANEL.md's join finding). */
+  oracleQuestionId: string;
+}
+
+/** The on-chain resolution record for one market, per DATA-RECON.md's
+ *  confirmed MarketResolutionEvent query, extended with the market's own
+ *  asset/question so the trust panel does not need a second lookup. Returns
+ *  null for a market that has not resolved (or was never on this venue). */
+export async function fetchMarketResolution(indexerUrl: string, marketId: string): Promise<MarketResolution | null> {
+  const query = `
+    query Resolution($marketId: String!) {
+      MarketResolutionEvent(where: { market_id: { _eq: $marketId } }, order_by: { timestamp: desc }, limit: 1) {
+        market_id
+        outcomeIdx
+        payoutNumerators
+        voided
+        timestamp
+        oracleQuestionId
+        market { asset question }
+      }
+    }
+  `;
+  const res = await fetch(indexerUrl, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ query, variables: { marketId } }),
+  });
+  if (!res.ok) throw new Error(`indexer request failed: HTTP ${res.status}`);
+  const json = (await res.json()) as {
+    data?: {
+      MarketResolutionEvent: Array<{
+        market_id: string;
+        outcomeIdx: number;
+        payoutNumerators: string[];
+        voided: boolean;
+        timestamp: string;
+        oracleQuestionId: string;
+        market: { asset: string; question: string };
+      }>;
+    };
+    errors?: Array<{ message: string }>;
+  };
+  if (json.errors?.length) throw new Error(`indexer query failed: ${json.errors[0]!.message}`);
+  const row = json.data?.MarketResolutionEvent?.[0];
+  if (!row) return null;
+  return {
+    marketId: row.market_id,
+    asset: row.market.asset,
+    question: row.market.question,
+    outcomeIdx: row.outcomeIdx,
+    payoutNumerators: row.payoutNumerators,
+    voided: row.voided,
+    timestamp: row.timestamp,
+    oracleQuestionId: row.oracleQuestionId,
+  };
+}
+
 export interface OpenBalanceRow {
   marketId: string;
   outcomeIndex: number;

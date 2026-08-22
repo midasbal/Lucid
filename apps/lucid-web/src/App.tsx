@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useBoard } from "./lib/useBoard";
 import { LiveBoard } from "./components/LiveBoard";
 import { MarketDetail } from "./components/MarketDetail";
+import { ResolvedMarketDetail } from "./components/ResolvedMarketDetail";
 import { Portfolio } from "./components/Portfolio";
 import { WalletBar } from "./components/WalletBar";
 
@@ -10,12 +11,19 @@ type View = "markets" | "portfolio";
 export default function App() {
   const board = useBoard();
   const [selected, setSelected] = useState<string | null>(null);
+  const [resolvedMarketId, setResolvedMarketId] = useState<string | null>(null);
   const [view, setView] = useState<View>("markets");
 
   const selectedRow = board.rows.find((r) => r.symbol === selected) ?? board.rows[0] ?? null;
 
   function openMarket(symbol: string) {
     setSelected(symbol);
+    setResolvedMarketId(null);
+    setView("markets");
+  }
+
+  function viewResolution(marketId: string) {
+    setResolvedMarketId(marketId);
     setView("markets");
   }
 
@@ -56,7 +64,9 @@ export default function App() {
             onSelect={setSelected}
           />
 
-          {selectedRow ? (
+          {resolvedMarketId ? (
+            <ResolvedMarketDetail marketId={resolvedMarketId} ctx={board.ctx} onBack={() => setResolvedMarketId(null)} />
+          ) : selectedRow ? (
             <MarketDetail row={selectedRow} ctx={board.ctx} />
           ) : (
             <div className="panel">
@@ -65,7 +75,7 @@ export default function App() {
           )}
         </div>
       ) : (
-        <Portfolio ctx={board.ctx} onOpenMarket={openMarket} />
+        <Portfolio ctx={board.ctx} onOpenMarket={openMarket} onViewResolution={viewResolution} />
       )}
     </div>
   );

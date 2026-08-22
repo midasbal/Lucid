@@ -774,3 +774,167 @@ body {
   margin-top: 10px;
   flex-wrap: wrap;
 }
+
+/* oracle trust panel */
+
+.resolved-detail-question {
+  margin-top: 10px;
+}
+
+.trust-question {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  margin: -4px 0 14px;
+}
+
+.trust-summary-row {
+  display: flex;
+  gap: 26px;
+  margin-bottom: 16px;
+}
+
+.trust-source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border-soft);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.trust-source-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: var(--bg-raised);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.trust-source-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.trust-source-dot.pass {
+  background: var(--yes);
+}
+
+.trust-source-dot.fail {
+  background: var(--no);
+}
+
+.trust-source-name {
+  min-width: 84px;
+  color: var(--text);
+}
+
+.trust-source-value {
+  flex: 1;
+  color: var(--text-dim);
+}
+
+.trust-source-status {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.trust-source-status.pass {
+  color: var(--yes);
+}
+
+.trust-source-status.fail {
+  color: var(--no);
+}
+
+.trust-caliber-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.trust-caliber-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.trust-caliber-badge.yes {
+  background: var(--yes-dim);
+  color: var(--yes);
+}
+
+.trust-caliber-badge.warn {
+  background: #2a2410;
+  color: var(--warn);
+}
+
+.trust-caliber-badge.no {
+  background: var(--no-dim);
+  color: var(--no);
+}
+
+.trust-caliber-score {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--text-dim);
+}
+
+.trust-caliber-definition {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.trust-criteria-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trust-criterion {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.trust-criterion-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  top: -1px;
+}
+
+.trust-criterion-dot.pass {
+  background: var(--yes);
+}
+
+.trust-criterion-dot.fail {
+  background: var(--no);
+}
+
+.trust-criterion-name {
+  min-width: 132px;
+  color: var(--text);
+  font-weight: 550;
+}
+
+.trust-criterion-summary {
+  color: var(--text-faint);
+}

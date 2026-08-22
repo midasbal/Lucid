@@ -10,6 +10,7 @@ export function OpenPositionsList({
   loading,
   error,
   onOpenMarket,
+  onViewResolution,
 }: {
   positions: OpenPosition[];
   loading: boolean;
@@ -17,6 +18,10 @@ export function OpenPositionsList({
   /** Routes into the existing market detail and auto-redeem flow, this view
    *  never re-implements arming, it only surfaces status and a way in. */
   onOpenMarket: (symbol: string) => void;
+  /** Routes into the resolved-market detail and its oracle trust panel, for
+   *  a position whose market already finalized (no live symbol to route
+   *  through onOpenMarket with, keyed by marketId instead). */
+  onViewResolution: (marketId: string) => void;
 }) {
   const hasStaleUnarmed = positions.some((p) => p.status === "settled" && p.armed === false);
 
@@ -82,6 +87,11 @@ export function OpenPositionsList({
                     {p.symbol && (
                       <button className="btn" data-testid="open-position-goto" onClick={() => onOpenMarket(p.symbol!)}>
                         {p.status === "trading" && p.armed === false ? "arm" : "open"}
+                      </button>
+                    )}
+                    {!p.symbol && p.status === "settled" && (
+                      <button className="btn" data-testid="open-position-resolution" onClick={() => onViewResolution(p.marketId)}>
+                        view resolution
                       </button>
                     )}
                   </div>
