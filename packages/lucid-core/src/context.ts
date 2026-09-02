@@ -17,6 +17,28 @@ import { SomniaMarkets } from "@somnia-chain/markets-sdk";
 import type { WalletClient, Account, Address } from "viem";
 import { loadConfig, loadEnv, makeChain, type EcConfig } from "@dreamdex-bot-kit/ec-core";
 
+// The SDK's own default fee ceiling (config.ts's DEFAULT_FEES) is 60 gwei,
+// sized for a base fee the SDK has never itself measured. Shannon's own
+// base fee is flat and stable at 6 gwei (checked live across five
+// consecutive blocks, matching eth_gasPrice exactly), so 60 gwei reserves
+// roughly 10x more than any real write needs. 15 gwei keeps 2.5x headroom
+// above the live base fee, comfortable margin for inclusion even if it
+// ticks up, while cutting the fee side of every write's gas reservation by
+// 4x. maxPriorityFeePerGas stays at the SDK's own default (0n): Somnia's
+// BFT inclusion has never needed a tip here.
+//
+// gas (the 10,000,000 ceiling) cannot be lowered from here: it lives only
+// on TraderConfig, not on SomniaMarketsConfig (ClientConfig & a signer-only
+// Pick from TraderConfig), and the exchange constructor
+// (@somnia-chain/markets-sdk's unified/exchange.js) destructures only
+// { privateKey, account, walletClient } out of what's passed here, never
+// forwarding gas to the trader it builds. Lowering it would mean reaching
+// into the SDK itself, out of scope here.
+const FEES = {
+  maxFeePerGas: 15_000_000_000n,
+  maxPriorityFeePerGas: 0n,
+};
+
 export interface LucidContext {
   exchange: SomniaMarkets;
   config: EcConfig;
@@ -52,6 +74,7 @@ export function createLucidContext(opts: LucidContextOptions = {}): LucidContext
     wsRpcUrl: config.wsRpcUrl,
     addresses: config.addresses,
     priceFeed: config.priceFeed,
+    fees: FEES,
     privateKey: opts.privateKey,
     account: opts.account,
     walletClient: opts.walletClient,
