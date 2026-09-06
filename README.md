@@ -1,3 +1,5 @@
+# it’s a wip, i’m not gonna finish it. feel free to take the idea and run with it.
+
 # Lucid
 
 Lucid is a client library, a market maker, and a non-custodial settlement layer for DreamDEX event contracts on Somnia: short-dated binary (YES/NO) markets on asset prices.
