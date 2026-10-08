@@ -103,39 +103,3 @@ An on-chain reactive execution layer exists alongside the off-chain makers: a de
 A user-facing app exists as well, `apps/lucid-web`: wallet connection via wagmi and viem, every open market shown with its own model-implied fair value next to the real order book, a price chart rendered straight from live data, non-custodial trading, and the full settlement surface a holder needs: arming auto-redeem in one signature so a position pays out automatically with no further action, a direct claim for a resolved position that was never armed, a fallback claim for an armed position the handler has not yet paid, and a sell-to-close for a still-trading position on either side. Alongside that, an oracle trust panel shows exactly how a resolved market's answer was reached, and a portfolio view shows open positions and history, cost basis, and PnL across every market the connected account has ever held. Every one of these is proven live on Shannon testnet with a real funded account, both headless and by hand, each reconciled against an independent read of the chain or the indexer rather than trusted from the app's own display.
 
 Not yet built: the on-chain reactive execution layer still runs one market at a time. The app also does not expose the maker or the reactive agent themselves as an in-app view; that is intentional, both are demonstrated separately rather than folded into the holder-facing app, which is scoped to the trading and settlement surface a holder actually needs.
-
-## Running the key pieces
-
-Install dependencies from the repository root:
-
-```bash
-npm install
-```
-
-Run the app (see [`apps/lucid-web`](apps/lucid-web) for the full account, including the browser-compatibility work it took to get lucid-core running client-side):
-
-```bash
-npm run dev -w @dreamdex-bot-kit/lucid-web
-```
-
-Run the maker's fair-value quoting logic, dry run by default (see [`strategies/lucid-maker`](strategies/lucid-maker) for full configuration):
-
-```bash
-cd strategies/lucid-maker && npm start
-```
-
-Run `lucid-core`'s live verification script (needs a funded testnet key; see [`packages/lucid-core`](packages/lucid-core) for setup):
-
-```bash
-npm run verify -w @dreamdex-bot-kit/lucid-core
-```
-
-Run `lucid-core`'s unit tests:
-
-```bash
-npm run test -w @dreamdex-bot-kit/lucid-core
-```
-
-## Credits
-
-Built on top of the DreamDEX bot kit, provided as the hackathon's starting point: shared trading client, backtest engine, and example strategies for DreamDEX on Somnia. See [LICENSE](LICENSE) for the upstream MIT license, which this project keeps and credits.
